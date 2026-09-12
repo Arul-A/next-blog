@@ -1,8 +1,15 @@
 export default function Footer() {
     return (
-        <footer className="fixed inset-x-0 bottom-0 flex flex-col items-center bg-neutral-900 text-center text-white">
-            <div className="w-full p-4 text-center">
-                © 2026 Blog. All rights reserved.
+        <footer className="border-t border-gray-100 bg-white text-gray-600 text-xs py-8">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center space-x-2">
+                    <span className="font-bold text-gray-900">NextBlog</span>
+                    <span>•</span>
+                    <span>Built with Next.js & MongoDB</span>
+                </div>
+                <div>
+                    © {new Date().getFullYear()} All rights reserved.
+                </div>
             </div>
         </footer>
     );
