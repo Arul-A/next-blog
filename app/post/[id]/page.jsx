@@ -17,7 +17,7 @@ export default function Post({params}) {
     post ? (
         <main className="container mx-auto px-4 pt-6 pb-20">
             <h2 className="text-4xl font-bold mb-4">{post?.title}</h2>
-            <p className="text-gray-500">Published on {post?.formated_date || post?.createdAt}</p>
+            <p className="text-gray-500">Published on {post?.formated_date}</p>
             <img src={post?.image} alt="Post Image" className="w-full h-80 sm:h-96 md:h-112.5 object-cover rounded-lg my-4" />
             <p>{post?.description}</p>
         </main>

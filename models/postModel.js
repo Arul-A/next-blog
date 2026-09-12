@@ -24,6 +24,6 @@ function changeDateFormat(date_str) {
 }
     
 
-const postModel = models.Post ||model('Post', postSchema)
+const postModel = models.Post || model('Post', postSchema)
 
 export default postModel;
