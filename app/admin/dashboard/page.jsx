@@ -11,6 +11,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [alert, setAlert] = useState({ type: "", message: "" });
+    const [currentPage, setCurrentPage] = useState(1);
+    const POSTS_PER_PAGE = 3;
 
     // Modal state for Create / Edit
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -175,12 +177,24 @@ export default function AdminDashboard() {
         }
     };
 
+    // Reset page to 1 when search term changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
     // Filtered posts based on search term
     const filteredPosts = posts.filter(
         (post) =>
             post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             post.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Pagination calculations
+    const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE) || 1;
+    const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+    const indexOfLastPost = safePage * POSTS_PER_PAGE;
+    const indexOfFirstPost = indexOfLastPost - POSTS_PER_PAGE;
+    const paginatedPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -270,8 +284,12 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="text-sm text-gray-500 self-end sm:self-center font-medium">
-                        Showing <span className="font-bold text-gray-800">{filteredPosts.length}</span> of{" "}
-                        <span className="font-bold text-gray-800">{posts.length}</span> posts
+                        Showing{" "}
+                        <span className="font-bold text-gray-800">
+                            {filteredPosts.length === 0 ? 0 : indexOfFirstPost + 1}–
+                            {Math.min(indexOfLastPost, filteredPosts.length)}
+                        </span>{" "}
+                        of <span className="font-bold text-gray-800">{filteredPosts.length}</span> posts
                     </div>
                 </div>
 
@@ -320,7 +338,7 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 bg-white">
-                                    {filteredPosts.map((post) => (
+                                    {paginatedPosts.map((post) => (
                                         <tr key={post._id} className="hover:bg-gray-50 transition">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center space-x-3">
@@ -366,13 +384,13 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                                                 <button
                                                     onClick={() => handleOpenEditModal(post)}
-                                                    className="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-md transition"
+                                                    className="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-md transition cursor-pointer"
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => handlePromptDelete(post)}
-                                                    className="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-md transition border border-red-200"
+                                                    className="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-md transition border border-red-200 cursor-pointer"
                                                 >
                                                     Delete
                                                 </button>
@@ -381,6 +399,50 @@ export default function AdminDashboard() {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {/* Table Pagination Footer */}
+                    {!loading && filteredPosts.length > 0 && totalPages > 1 && (
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+                            <div className="text-xs text-gray-500 font-medium">
+                                Page <span className="font-semibold text-gray-900">{safePage}</span> of{" "}
+                                <span className="font-semibold text-gray-900">{totalPages}</span>
+                            </div>
+
+                            <div className="inline-flex items-center space-x-2">
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={safePage === 1}
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                                >
+                                    ← Previous
+                                </button>
+
+                                <div className="flex items-center space-x-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`w-8 h-8 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                                                pageNum === safePage
+                                                    ? "bg-blue-600 text-white shadow-xs"
+                                                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                                            }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={safePage === totalPages}
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                                >
+                                    Next →
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
